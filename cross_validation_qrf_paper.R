@@ -48,10 +48,10 @@ data<-data[!is.na(data$EMBERGER),]#clean some NA values
 
 fold = 100 #Number of time where the data will be randomly separate
 size_validation = 0.75*nrow(data)# the pourcentage, the ratio of calibration profil will be use for validation
-vector_r2 <- data.frame()
-vector_me <- data.frame()
-vector_mse <- data.frame()
-vector_rmse <- data.frame()
+vector_r2 <- data.frame()#creation of an empty dataframe to store r2 for each iteration
+vector_me <- data.frame()#same for me
+vector_mse <- data.frame()#same for mse
+vector_rmse <- data.frame()#same for rmse
 
 
 #Creating a progress bar to know the status of CV
@@ -60,27 +60,27 @@ progress.bar$init(fold)
 
 for(iteration in 1:fold){
  
-  train <- sample(nrow(data),size_validation) ## SELECTION DE 25% POUR LE JEU DE VALIDATION EXTERNE
-  mymodel <- quantregForest(x=data[train,c(58:59,65:83)],y=data[train,11],mtry=7,nodesize=10,ntree=1000)
-  prediction <-predict(mymodel,data[-train,c(58:59,65:83)],quantile=c(0.50))
-  
+  train <- sample(nrow(data),size_validation) ## Selection of the training set
+  mymodel <- quantregForest(x=data[train,c(58:59,65:83)],y=data[train,11],mtry=7,nodesize=10,ntree=1000)#run calibration of the model
+  prediction <-predict(mymodel,data[-train,c(58:59,65:83)],quantile=c(0.50))#run validation of the model
+  ##Preparation of the result table to calculate indicators
   result <- as.data.frame(cbind(prediction, data[-train, 11]))
   names(result) <- c("Predicted", "Actual")
   result$residu <-(result$Predicted) - (result$Actual)
+  ##Calculation of the indicators
   r2<-1-(var(result$residu)/var(result$Actual))
   me<-mean(result$residu)
   mse<-mean(result$residu^2)
   rmse<-sqrt(mean(result$residu^2))
+  #Storage of the iterated indicators
   vector_r2<-rbind(vector_r2,r2)
   vector_me<-rbind(vector_me,me)
   vector_mse<-rbind(vector_mse,mse)
   vector_rmse<-rbind(vector_rmse,rmse)
-  # append this iteration's test set to the test set copy data frame
-  # keep only the Sepal Length Column
-  
-  progress.bar$step()
-}
 
+  progress.bar$step()#add one step in the progress bar
+}
+#calculation of the cross-validated indicators
 mean(vector_r2[,1])
 mean(vector_me[,1])
 mean(vector_mse[,1])
