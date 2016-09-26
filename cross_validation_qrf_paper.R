@@ -62,7 +62,7 @@ for(iteration in 1:fold){
  
   train <- sample(nrow(data),size_validation) ## Selection of the training set
   mymodel <- quantregForest(x=data[train,c(58:59,65:83)],y=data[train,11],mtry=7,nodesize=10,ntree=1000)#run calibration of the model
-  prediction <-predict(mymodel,data[-train,c(58:59,65:83)],quantile=c(0.50))#run validation of the model
+  prediction <-predict(mymodel,data[-train,c(58:59,65:83)],quantile=c(0.005,0.025,0.05,0.1,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95,0.975,0.995))#run validation of the model
   ##Preparation of the result table to calculate indicators
   result <- as.data.frame(cbind(prediction, data[-train, 11]))
   names(result) <- c("Predicted", "Actual")
