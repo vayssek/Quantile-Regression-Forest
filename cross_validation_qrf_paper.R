@@ -64,19 +64,25 @@ for(iteration in 1:fold){
   mymodel <- quantregForest(x=data[train,c(58:59,65:83)],y=data[train,11],mtry=7,nodesize=10,ntree=1000)#run calibration of the model
   prediction <-predict(mymodel,data[-train,c(58:59,65:83)],quantile=c(0.005,0.025,0.05,0.1,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95,0.975,0.995))#run validation of the model
   ##Preparation of the result table to calculate indicators
-  result <- as.data.frame(cbind(prediction, data[-train, 11]))
-  names(result) <- c("Predicted", "Actual")
-  result$residu <-(result$Predicted) - (result$Actual)
-  ##Calculation of the indicators
-  r2<-1-(var(result$residu)/var(result$Actual))
-  me<-mean(result$residu)
-  mse<-mean(result$residu^2)
-  rmse<-sqrt(mean(result$residu^2))
-  #Storage of the iterated indicators
-  vector_r2<-rbind(vector_r2,r2)
-  vector_me<-rbind(vector_me,me)
-  vector_mse<-rbind(vector_mse,mse)
-  vector_rmse<-rbind(vector_rmse,rmse)
+  if(i==1){
+    result <- as.data.frame(cbind(prediction, data[-train, 11]))
+  }else{
+    new_result <- as.data.frame(cbind(prediction, data[-train, 11]))
+    result<-rbind(result,new_result)
+  }
+#   result <- as.data.frame(cbind(prediction, data[-train, 11]))
+#   names(result) <- c("Predicted", "Actual")
+#   result$residu <-(result$Predicted) - (result$Actual)
+#   ##Calculation of the indicators
+#   r2<-1-(var(result$residu)/var(result$Actual))
+#   me<-mean(result$residu)
+#   mse<-mean(result$residu^2)
+#   rmse<-sqrt(mean(result$residu^2))
+#   #Storage of the iterated indicators
+#   vector_r2<-rbind(vector_r2,r2)
+#   vector_me<-rbind(vector_me,me)
+#   vector_mse<-rbind(vector_mse,mse)
+#   vector_rmse<-rbind(vector_rmse,rmse)
 
   progress.bar$step()#add one step in the progress bar
 }
