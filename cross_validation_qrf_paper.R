@@ -70,26 +70,33 @@ for(iteration in 1:fold){
     new_result <- as.data.frame(cbind(prediction, data[-train, 11]))
     result<-rbind(result,new_result)
   }
-#   result <- as.data.frame(cbind(prediction, data[-train, 11]))
-#   names(result) <- c("Predicted", "Actual")
 #   result$residu <-(result$Predicted) - (result$Actual)
-#   ##Calculation of the indicators
-#   r2<-1-(var(result$residu)/var(result$Actual))
-#   me<-mean(result$residu)
-#   mse<-mean(result$residu^2)
-#   rmse<-sqrt(mean(result$residu^2))
-#   #Storage of the iterated indicators
-#   vector_r2<-rbind(vector_r2,r2)
-#   vector_me<-rbind(vector_me,me)
-#   vector_mse<-rbind(vector_mse,mse)
-#   vector_rmse<-rbind(vector_rmse,rmse)
+  ##Calculation of the indicators
+  r2<-1-(var(result$residu)/var(result$Actual))
+  me<-mean(result$residu)
+  mse<-mean(result$residu^2)
+  rmse<-sqrt(mean(result$residu^2))
+  #Storage of the iterated indicators
+  vector_r2<-rbind(vector_r2,r2)
+  vector_me<-rbind(vector_me,me)
+  vector_mse<-rbind(vector_mse,mse)
+  vector_rmse<-rbind(vector_rmse,rmse)
 
   progress.bar$step()#add one step in the progress bar
 }
-#calculation of the cross-validated indicators
-mean(vector_r2[,1])
-mean(vector_me[,1])
-mean(vector_mse[,1])
-mean(vector_rmse[,1])
+names(result)[1:24]<-c("q005","q025","q05","q10","q15","q20","q25","q30","q35","q40","q45","Predicted","q55","q60","q65","q70","q75","q80","q85","q90","q95","q975","q995","Actual")
+
+  ##Calculation of the indicators
+result$residu <-(result$Predicted) - (result$Actual)
+r2<-1-(var(result$residu)/var(result$Actual))
+me<-mean(result$residu)
+mse<-mean(result$residu^2)
+rmse<-sqrt(mean(result$residu^2))
+r2
+me
+mse
+rmse
+
+##Calculation of the pi for all theoric interval
 
   
