@@ -40,14 +40,14 @@ load()#add the location of the .RDATA files with the soil data for pH, clay and 
 ##case of quantile regression forest##
 #pH#
 #data <- nadftph2_cal#choice of the table use to define the data using in the model
-data<-nadftoc2_cal
+data<-nadftarg2_cal
 data<-data[!is.na(data$MNT),]#clean some NA values
 data<-data[!is.na(data$EMBERGER),]#clean some NA values
 
 # in this cross validation example, the data represent the all the soil profile available to calibrate the
 # model.  
 transformation="yes"
-case="oc"
+case="clay"
 fold = 100 #Number of time where the data will be randomly separate
 size_validation = 0.75*nrow(data)# the pourcentage, the ratio of calibration profil will be use for validation
 remove(result)
@@ -59,13 +59,13 @@ progress.bar$init(fold)
 for(iteration in 1:fold){
  
   train <- sample(nrow(data),size_validation) ## Selection of the training set
-  mymodel <- quantregForest(x=data[train,c(58:59,65:83)],y=data[train,5],mtry=7,nodesize=10,ntree=1000)#run calibration of the model
+  mymodel <- quantregForest(x=data[train,c(58:59,65:83)],y=data[train,23],mtry=7,nodesize=10,ntree=1000)#run calibration of the model
   prediction <-predict(mymodel,data[-train,c(58:59,65:83)],quantile=c(0.005,0.025,0.05,0.1,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95,0.975,0.995))#run validation of the model
   ##Preparation of the result table to calculate indicators
   if(iteration==1){
-    result <- as.data.frame(cbind(prediction, data[-train, 5]))
+    result <- as.data.frame(cbind(prediction, data[-train, 23]))
   }else{
-    new_result <- as.data.frame(cbind(prediction, data[-train, 5]))
+    new_result <- as.data.frame(cbind(prediction, data[-train, 23]))
     result<-rbind(result,new_result)
   }
   progress.bar$step()#add one step in the progress bar
@@ -77,6 +77,11 @@ names(result)[1:24]<-c("q005","q025","q05","q10","q15","q20","q25","q30","q35","
    result$Predicted<-(exp(result$Predicted)-1)
     result$Actual<-(exp(result$Actual)-1)
  }
+ if(transformation=="yes"&case=="clay"){
+   result$Predicted<-(result$Predicted)*(result$Predicted)
+    result$Actual<-(result$Actual)*(result$Actual)
+    }
+
 result$residu <-(result$Predicted) - (result$Actual)
 r2<-1-(var(result$residu)/var(result$Actual))
 me<-mean(result$residu)
@@ -103,6 +108,9 @@ result$cond10<-NA
   ##Calculation of the indicators
  if(transformation=="yes"&case=="oc"){
     result$Actual<-(log(result$Actual+1))
+ }
+ if(transformation=="yes"&case=="clay"){
+    result$Actual<-(sqrt(result$Actual))
  }
 total<-length(result$Actual)
 for(i in 1:total){
@@ -157,7 +165,7 @@ for(i in 1:total){
   ap<-qplot(PI,Pourcentage,data=y)
   ap + geom_abline(intercept = 0,colour="red",size=2)+geom_point(colour = "black", size = 3.5) +labs(title="a")+theme_bw()+scale_y_continuous(limits = c(0, 0.99))+scale_x_continuous(limits = c(0, 0.99))+ylab(label = "Proportion within interval")
 
-write.table(y, "D://CD/Projet_DSM/Quantile_Regression_Forest/results/results_dataframe/qrfpi_result_oc.csv", row.names=FALSE)
-write.table(result, "D://CD/Projet_DSM/Quantile_Regression_Forest/results/results_dataframe/qrf_result_oc.csv", row.names=FALSE)
+write.table(y, "D://CD/Projet_DSM/Quantile_Regression_Forest/results/results_dataframe/qrfpi_result_clay.csv", row.names=FALSE)
+write.table(result, "D://CD/Projet_DSM/Quantile_Regression_Forest/results/results_dataframe/qrf_result_clay.csv", row.names=FALSE)
   
   
